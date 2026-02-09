@@ -210,43 +210,80 @@ namespace fossil {
         public:
             fossil_time_date_t raw;
         
-            Date();
+            /* Construction */
+            Date() { }
         
-            void now();
+            /* Core */
+            inline void now() {
+                fossil_time_date_now(&raw);
+            }
         
-            bool validate() const;
-            void normalize();
+            inline bool validate() const {
+                return fossil_time_date_validate(&raw) != 0;
+            }
         
-            int compare(const Date &other) const;
-            int64_t diff_seconds(const Date &other) const;
+            inline void normalize() {
+                fossil_time_date_normalize(&raw);
+            }
         
-            int64_t to_unix_seconds() const;
-            int64_t to_unix_nanoseconds() const;
+            /* Comparison */
+            inline int compare(const Date &other) const {
+                return fossil_time_date_compare(&raw, &other.raw);
+            }
         
-            void from_unix_seconds(int64_t seconds);
+            inline int64_t diff_seconds(const Date &other) const {
+                return fossil_time_date_diff_seconds(&raw, &other.raw);
+            }
         
-            int format(
+            /* Conversion */
+            inline int64_t to_unix_seconds() const {
+                return fossil_time_date_to_unix_seconds(&raw);
+            }
+        
+            inline int64_t to_unix_nanoseconds() const {
+                return fossil_time_date_to_unix_nanoseconds(&raw);
+            }
+        
+            inline void from_unix_seconds(int64_t seconds) {
+                fossil_time_date_from_unix_seconds(seconds, &raw);
+            }
+        
+            /* Formatting */
+            inline int format(
                 char *buffer,
                 size_t buffer_size,
                 const char *format_id
-            ) const;
+            ) const {
+                return fossil_time_date_format(&raw, buffer, buffer_size, format_id);
+            }
         
-            int format_smart(
+            inline int format_smart(
                 const Date &now,
                 char *buffer,
                 size_t buffer_size
-            ) const;
+            ) const {
+                return fossil_time_date_format_smart(
+                    &raw, &now.raw, buffer, buffer_size
+                );
+            }
         
-            int format_relative(
+            inline int format_relative(
                 const Date &now,
                 char *buffer,
                 size_t buffer_size
-            ) const;
+            ) const {
+                return fossil_time_date_format_relative(
+                    &raw, &now.raw, buffer, buffer_size
+                );
+            }
         
-            bool search(
+            /* Search / DSL */
+            inline bool search(
                 const Date &now,
                 const char *query
-            ) const;
+            ) const {
+                return fossil_time_date_search(&raw, &now.raw, query) != 0;
+            }
         };
     
     } /* namespace time */
