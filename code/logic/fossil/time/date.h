@@ -82,6 +82,13 @@ int fossil_time_date_format_relative(
     size_t buffer_size
 );
 
+/* Search/query DSL: string-based datetime search */
+int fossil_time_date_search(
+    const fossil_time_date_t *dt,
+    const fossil_time_date_t *now,
+    const char *query
+);
+
 #ifdef __cplusplus
 } // extern "C"
 #endif
@@ -113,6 +120,9 @@ public:
     int format(char *buffer, size_t buffer_size, const char *format_id) const;
     int format_smart(const Date &now, char *buffer, size_t buffer_size) const;
     int format_relative(const Date &now, char *buffer, size_t buffer_size) const;
+
+    /* Search/query DSL: string-based datetime search */
+    bool search(const Date &now, const char *query) const;
 };
 
 } // namespace time
