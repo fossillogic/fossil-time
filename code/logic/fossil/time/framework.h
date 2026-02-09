@@ -27,7 +27,7 @@
 
 #include "sleep.h"
 #include "date.h"
-#include "schedule.h"
+#include "calendar.h"
 #include "timer.h"
 #include "span.h"
 
