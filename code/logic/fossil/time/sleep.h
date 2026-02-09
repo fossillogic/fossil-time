@@ -31,13 +31,57 @@
 extern "C" {
 #endif
 
-void fossil_time_sleep_ns(uint64_t nanoseconds);
-void fossil_time_sleep_ms(uint32_t milliseconds);
-void fossil_time_sleep_sec(uint32_t seconds);
+/* ======================================================
+ * C API — Sleep
+ * ====================================================== */
+
+/*
+ * Sleep for a duration specified by unit string.
+ *
+ * unit_id examples:
+ *   "sec"
+ *   "ms"
+ *   "us"
+ *   "ns"
+ *   "ps"
+ *   "fs"
+ *   "as"
+ *   "zs"
+ *   "ys"
+ *
+ * Value is interpreted in the given unit.
+ */
+void fossil_time_sleep(
+    uint64_t value,
+    const char *unit_id
+);
+
+/* Explicit helpers (no guessing, no strings) */
+void fossil_time_sleep_seconds(uint64_t seconds);
+void fossil_time_sleep_milliseconds(uint64_t milliseconds);
+void fossil_time_sleep_microseconds(uint64_t microseconds);
+void fossil_time_sleep_nanoseconds(uint64_t nanoseconds);
+
+/*
+ * AI-friendly sleep:
+ * Examples:
+ *   "a moment"
+ *   "short"
+ *   "human_tick"
+ *   "frame"
+ *   "yield"
+ */
+void fossil_time_sleep_ai(
+    const char *hint_id
+);
 
 #ifdef __cplusplus
-} // extern "C"
+} /* extern "C" */
 #endif
+
+/* ======================================================
+ * C++ Wrapper — Thin Only
+ * ====================================================== */
 
 #ifdef __cplusplus
 namespace fossil {
@@ -45,13 +89,38 @@ namespace time {
 
 class Sleep {
 public:
-    static void ns(uint64_t nanoseconds);
-    static void ms(uint32_t milliseconds);
-    static void sec(uint32_t seconds);
+    Sleep() = delete; /* static-only utility */
+
+    static inline void for_unit(
+        uint64_t value,
+        const char *unit_id
+    ) {
+        fossil_time_sleep(value, unit_id);
+    }
+
+    static inline void seconds(uint64_t v) {
+        fossil_time_sleep_seconds(v);
+    }
+
+    static inline void milliseconds(uint64_t v) {
+        fossil_time_sleep_milliseconds(v);
+    }
+
+    static inline void microseconds(uint64_t v) {
+        fossil_time_sleep_microseconds(v);
+    }
+
+    static inline void nanoseconds(uint64_t v) {
+        fossil_time_sleep_nanoseconds(v);
+    }
+
+    static inline void ai(const char *hint_id) {
+        fossil_time_sleep_ai(hint_id);
+    }
 };
 
-} // namespace time
-} // namespace fossil
+} /* namespace time */
+} /* namespace fossil */
 #endif
 
-#endif
+#endif /* FOSSIL_TIME_SLEEP_H */
