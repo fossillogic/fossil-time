@@ -47,6 +47,33 @@ static int days_in_month(int32_t year, int8_t month) {
 }
 
 /* ======================================================
+ * Internal: civil date to epoch seconds (UTC)
+ * No libc time, no TZ, fully deterministic
+ * ====================================================== */
+
+static int64_t fossil_time_days_from_civil(int64_t y, unsigned m, unsigned d) {
+    y -= m <= 2;
+    const int64_t era = (y >= 0 ? y : y - 399) / 400;
+    const unsigned yoe = (unsigned)(y - era * 400);
+    const unsigned doy = (153 * (m + (m > 2 ? -3 : 9)) + 2) / 5 + d - 1;
+    const unsigned doe = yoe * 365 + yoe / 4 - yoe / 100 + doy;
+    return era * 146097 + (int64_t)doe - 719468;
+}
+
+static int64_t fossil_time_tm_to_epoch_utc(const struct tm *tm) {
+    int64_t days = fossil_time_days_from_civil(
+        tm->tm_year + 1900,
+        (unsigned)(tm->tm_mon + 1),
+        (unsigned)tm->tm_mday
+    );
+
+    return days * 86400
+         + tm->tm_hour * 3600
+         + tm->tm_min * 60
+         + tm->tm_sec;
+}
+
+/* ======================================================
  * Internal: portable UTC timegm replacement
  * ====================================================== */
 
@@ -206,7 +233,8 @@ int64_t fossil_time_date_to_unix_seconds(
     tm.tm_min  = dt->minute;
     tm.tm_sec  = dt->second;
 
-    return (int64_t)timegm(&tm) - (dt->tz_offset_min * 60);
+    int64_t seconds = fossil_time_tm_to_epoch_utc(&tm);
+    return seconds - (dt->tz_offset_min * 60);
 }
 
 int64_t fossil_time_date_to_unix_nanoseconds(
