@@ -36,40 +36,66 @@ extern "C" {
  * ====================================================== */
 
 /*
- * Sleep for a duration specified by unit string.
+ * Sleep for a duration specified by a unit string.
  *
- * unit_id examples:
- *   "sec"
- *   "ms"
- *   "us"
- *   "ns"
- *   "ps"
- *   "fs"
- *   "as"
- *   "zs"
- *   "ys"
+ * @param value    The numeric value representing the amount of time to sleep.
+ * @param unit_id  A string representing the time unit. Supported units include:
+ *                 "sec" (seconds), "ms" (milliseconds), "us" (microseconds),
+ *                 "ns" (nanoseconds), "ps" (picoseconds), "fs" (femtoseconds),
+ *                 "as" (attoseconds), "zs" (zeptoseconds), "ys" (yoctoseconds).
  *
- * Value is interpreted in the given unit.
+ * The function interprets the value according to the specified unit and
+ * suspends execution for the corresponding duration.
  */
 void fossil_time_sleep(
     uint64_t value,
     const char *unit_id
 );
 
-/* Explicit helpers (no guessing, no strings) */
+/*
+ * Sleep for a specified number of seconds.
+ *
+ * @param seconds  The number of seconds to sleep.
+ *
+ * This function provides an explicit, type-safe way to sleep for whole seconds.
+ */
 void fossil_time_sleep_seconds(uint64_t seconds);
+
+/*
+ * Sleep for a specified number of milliseconds.
+ *
+ * @param milliseconds  The number of milliseconds to sleep.
+ *
+ * This function provides an explicit, type-safe way to sleep for millisecond durations.
+ */
 void fossil_time_sleep_milliseconds(uint64_t milliseconds);
+
+/*
+ * Sleep for a specified number of microseconds.
+ *
+ * @param microseconds  The number of microseconds to sleep.
+ *
+ * This function provides an explicit, type-safe way to sleep for microsecond durations.
+ */
 void fossil_time_sleep_microseconds(uint64_t microseconds);
+
+/*
+ * Sleep for a specified number of nanoseconds.
+ *
+ * @param nanoseconds  The number of nanoseconds to sleep.
+ *
+ * This function provides an explicit, type-safe way to sleep for nanosecond durations.
+ */
 void fossil_time_sleep_nanoseconds(uint64_t nanoseconds);
 
 /*
- * AI-friendly sleep:
- * Examples:
- *   "a moment"
- *   "short"
- *   "human_tick"
- *   "frame"
- *   "yield"
+ * Sleep for a duration specified by a human-friendly hint string.
+ *
+ * @param hint_id  A string describing the desired sleep duration in a
+ *                 human-readable or AI-friendly way. Examples include:
+ *                 "a moment", "short", "human_tick", "frame", "yield".
+ *
+ * The function interprets the hint and sleeps for an appropriate duration.
  */
 void fossil_time_sleep_ai(
     const char *hint_id
@@ -91,6 +117,18 @@ class Sleep {
 public:
     Sleep() = delete; /* static-only utility */
 
+    /**
+     * @brief Sleep for a duration specified by a unit string.
+     *
+     * @param value    The numeric value representing the amount of time to sleep.
+     * @param unit_id  A string representing the time unit. Supported units include:
+     *                 "sec" (seconds), "ms" (milliseconds), "us" (microseconds),
+     *                 "ns" (nanoseconds), "ps" (picoseconds), "fs" (femtoseconds),
+     *                 "as" (attoseconds), "zs" (zeptoseconds), "ys" (yoctoseconds).
+     *
+     * This function interprets the value according to the specified unit and
+     * suspends execution for the corresponding duration.
+     */
     static inline void for_unit(
         uint64_t value,
         const char *unit_id
@@ -98,22 +136,59 @@ public:
         fossil_time_sleep(value, unit_id);
     }
 
+    /**
+     * @brief Sleep for a specified number of seconds.
+     *
+     * @param v  The number of seconds to sleep.
+     *
+     * Provides an explicit, type-safe way to sleep for whole seconds.
+     */
     static inline void seconds(uint64_t v) {
         fossil_time_sleep_seconds(v);
     }
 
+    /**
+     * @brief Sleep for a specified number of milliseconds.
+     *
+     * @param v  The number of milliseconds to sleep.
+     *
+     * Provides an explicit, type-safe way to sleep for millisecond durations.
+     */
     static inline void milliseconds(uint64_t v) {
         fossil_time_sleep_milliseconds(v);
     }
 
+    /**
+     * @brief Sleep for a specified number of microseconds.
+     *
+     * @param v  The number of microseconds to sleep.
+     *
+     * Provides an explicit, type-safe way to sleep for microsecond durations.
+     */
     static inline void microseconds(uint64_t v) {
         fossil_time_sleep_microseconds(v);
     }
 
+    /**
+     * @brief Sleep for a specified number of nanoseconds.
+     *
+     * @param v  The number of nanoseconds to sleep.
+     *
+     * Provides an explicit, type-safe way to sleep for nanosecond durations.
+     */
     static inline void nanoseconds(uint64_t v) {
         fossil_time_sleep_nanoseconds(v);
     }
 
+    /**
+     * @brief Sleep for a duration specified by a human-friendly hint string.
+     *
+     * @param hint_id  A string describing the desired sleep duration in a
+     *                 human-readable or AI-friendly way. Examples include:
+     *                 "a moment", "short", "human_tick", "frame", "yield".
+     *
+     * Interprets the hint and sleeps for an appropriate duration.
+     */
     static inline void ai(const char *hint_id) {
         fossil_time_sleep_ai(hint_id);
     }

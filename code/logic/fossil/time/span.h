@@ -87,11 +87,24 @@ typedef struct fossil_time_span_t {
  * C API — Core
  * ====================================================== */
 
-/* Zero / reset */
+/* 
+ * Zero or reset all fields of the span to zero, including the precision mask.
+ * This function is useful for initializing or reusing a span structure.
+ */
 void fossil_time_span_clear(fossil_time_span_t *span);
 
-/* Validation & normalization */
-int  fossil_time_span_validate(const fossil_time_span_t *span);
+/*
+ * Validate the contents of the span.
+ * Returns nonzero if the span is valid (e.g., all fields are within expected ranges),
+ * or zero if the span contains invalid values.
+ */
+int fossil_time_span_validate(const fossil_time_span_t *span);
+
+/*
+ * Normalize the span fields, carrying overflow from lower units to higher units
+ * (e.g., 1000 milliseconds becomes 1 second), and updating the precision mask accordingly.
+ * This ensures the span is in canonical form.
+ */
 void fossil_time_span_normalize(fossil_time_span_t *span);
 
 /* ======================================================
@@ -99,11 +112,23 @@ void fossil_time_span_normalize(fossil_time_span_t *span);
  * ====================================================== */
 
 /*
- * Create span from value + unit string.
+ * Create a time span from a value and a unit string.
  *
- * unit_id examples:
- *   "days", "hours", "minutes", "seconds"
- *   "ms", "us", "ns", "ps", "fs", "as", "zs", "ys"
+ * This function sets the appropriate field in the span structure based on the
+ * provided unit identifier and value. The precision mask is updated to reflect
+ * the chosen unit. All other fields are set to zero.
+ *
+ * Parameters:
+ *   span    - Pointer to the span structure to initialize.
+ *   value   - The numeric value for the specified unit.
+ *   unit_id - String identifier for the unit. Supported values include:
+ *             "days", "hours", "minutes", "seconds",
+ *             "ms" (milliseconds), "us" (microseconds), "ns" (nanoseconds),
+ *             "ps" (picoseconds), "fs" (femtoseconds), "as" (attoseconds),
+ *             "zs" (zeptoseconds), "ys" (yoctoseconds).
+ *
+ * Example:
+ *   fossil_time_span_from_unit(&span, 5, "seconds");
  */
 void fossil_time_span_from_unit(
     fossil_time_span_t *span,
@@ -112,12 +137,19 @@ void fossil_time_span_from_unit(
 );
 
 /*
- * AI-friendly construction:
- *   "moment"
- *   "short"
- *   "long"
- *   "human_tick"
- *   "frame"
+ * Create a time span using an AI-friendly or semantic hint.
+ *
+ * This function initializes the span structure based on a human-readable or
+ * AI-oriented hint string. The hint_id can represent common durations or
+ * semantic concepts, such as "moment", "short", "long", "human_tick", or "frame".
+ * The actual mapping of hints to durations is implementation-defined.
+ *
+ * Parameters:
+ *   span    - Pointer to the span structure to initialize.
+ *   hint_id - String identifier for the semantic duration hint.
+ *
+ * Example:
+ *   fossil_time_span_from_ai(&span, "moment");
  */
 void fossil_time_span_from_ai(
     fossil_time_span_t *span,
@@ -128,12 +160,38 @@ void fossil_time_span_from_ai(
  * C API — Arithmetic
  * ====================================================== */
 
+/**
+ * Add two time spans together.
+ *
+ * This function adds the corresponding fields of two fossil_time_span_t structures
+ * and stores the result in the 'result' structure. The precision mask of the result
+ * is the bitwise OR of the input precision masks. The result is not automatically
+ * normalized; call fossil_time_span_normalize() if canonical form is required.
+ *
+ * Parameters:
+ *   result - Pointer to the span structure to store the sum.
+ *   a      - Pointer to the first operand span.
+ *   b      - Pointer to the second operand span.
+ */
 void fossil_time_span_add(
     fossil_time_span_t *result,
     const fossil_time_span_t *a,
     const fossil_time_span_t *b
 );
 
+/**
+ * Subtract one time span from another.
+ *
+ * This function subtracts the fields of span 'b' from span 'a' and stores the result
+ * in the 'result' structure. The precision mask of the result is the bitwise OR of
+ * the input precision masks. The result is not automatically normalized; call
+ * fossil_time_span_normalize() if canonical form is required.
+ *
+ * Parameters:
+ *   result - Pointer to the span structure to store the difference.
+ *   a      - Pointer to the minuend span.
+ *   b      - Pointer to the subtrahend span.
+ */
 void fossil_time_span_sub(
     fossil_time_span_t *result,
     const fossil_time_span_t *a,
@@ -144,10 +202,38 @@ void fossil_time_span_sub(
  * C API — Conversion
  * ====================================================== */
 
+/**
+ * Convert a time span to total seconds.
+ *
+ * This function computes the total number of seconds represented by the span,
+ * aggregating all fields (days, hours, minutes, seconds, and sub-second units)
+ * into a single integer value in seconds. Sub-second units are truncated.
+ * The calculation only includes fields indicated by the precision mask.
+ *
+ * Parameters:
+ *   span - Pointer to the span structure to convert.
+ *
+ * Returns:
+ *   The total number of seconds as a 64-bit integer.
+ */
 int64_t fossil_time_span_to_seconds(
     const fossil_time_span_t *span
 );
 
+/**
+ * Convert a time span to total nanoseconds.
+ *
+ * This function computes the total number of nanoseconds represented by the span,
+ * aggregating all fields (days, hours, minutes, seconds, and sub-second units)
+ * into a single integer value in nanoseconds. The calculation only includes
+ * fields indicated by the precision mask.
+ *
+ * Parameters:
+ *   span - Pointer to the span structure to convert.
+ *
+ * Returns:
+ *   The total number of nanoseconds as a 64-bit integer.
+ */
 int64_t fossil_time_span_to_nanoseconds(
     const fossil_time_span_t *span
 );
@@ -156,12 +242,30 @@ int64_t fossil_time_span_to_nanoseconds(
  * C API — Formatting
  * ====================================================== */
 
-/*
- * format_id examples:
- *   "short"     -> "5s"
- *   "human"     -> "5 seconds"
- *   "precise"   -> "5.000000000 s"
- *   "ai"
+/**
+ * Format a time span as a string.
+ *
+ * This function converts the given fossil_time_span_t structure into a
+ * human-readable string representation, according to the specified format_id.
+ * The formatted string is written to the provided buffer, which must be at
+ * least buffer_size bytes in length. The output is always null-terminated
+ * unless buffer_size is zero.
+ *
+ * Supported format_id values include:
+ *   "short"   - Compact notation (e.g., "5s", "2h 30m").
+ *   "human"   - Human-friendly words (e.g., "5 seconds", "2 hours, 30 minutes").
+ *   "precise" - High-precision decimal (e.g., "5.000000000 s").
+ *   "ai"      - AI/semantic-friendly format (implementation-defined).
+ *
+ * Parameters:
+ *   span        - Pointer to the span structure to format.
+ *   buffer      - Pointer to the character buffer to receive the formatted string.
+ *   buffer_size - Size of the buffer in bytes.
+ *   format_id   - String identifier for the desired output format.
+ *
+ * Returns:
+ *   The number of characters written (excluding the null terminator), or a negative
+ *   value if an error occurred (e.g., invalid format_id or insufficient buffer).
  */
 int fossil_time_span_format(
     const fossil_time_span_t *span,
