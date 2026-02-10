@@ -25,30 +25,119 @@
 #ifndef FOSSIL_TIME_CALENDAR_H
 #define FOSSIL_TIME_CALENDAR_H
 
+#include <stdint.h>
 #include "date.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef enum {
-    FOSSIL_TIME_SEASON_UNKNOWN,
-    FOSSIL_TIME_SEASON_SPRING,
-    FOSSIL_TIME_SEASON_SUMMER,
-    FOSSIL_TIME_SEASON_AUTUMN,
-    FOSSIL_TIME_SEASON_WINTER
-} fossil_time_season_t;
+/* ======================================================
+ * Fossil Time — Calendar Logic
+ * ====================================================== */
 
-int fossil_time_calendar_is_leap_year(int year);
-int fossil_time_calendar_days_in_month(int year, int month);
-int fossil_time_calendar_is_weekend(const fossil_time_date_t *dt);
-int fossil_time_calendar_get_quarter(const fossil_time_date_t *dt);
-fossil_time_season_t fossil_time_calendar_get_season(const fossil_time_date_t *dt, int northern_hemisphere);
-int fossil_time_calendar_get_holiday(const fossil_time_date_t *dt);
+/*
+ * Calendar utilities operate purely on provided dates.
+ * No system time, no locale guessing, no global state.
+ */
+
+/* ======================================================
+ * C API — Core calendar math
+ * ====================================================== */
+
+int fossil_time_calendar_is_leap_year(
+    int32_t year
+);
+
+int fossil_time_calendar_days_in_month(
+    int32_t year,
+    int8_t month
+);
+
+/*
+ * Compute derived fields on the date.
+ * Does NOT modify higher-precision fields.
+ */
+void fossil_time_calendar_compute_derived(
+    fossil_time_date_t *dt
+);
+
+/* ======================================================
+ * C API — Queries (string IDs)
+ * ====================================================== */
+
+/*
+ * Query examples:
+ *   "weekday"
+ *   "weekend"
+ *   "monday"
+ *   "friday"
+ */
+int fossil_time_calendar_is(
+    const fossil_time_date_t *dt,
+    const char *query_id
+);
+
+/*
+ * Get calendar classification via string ID.
+ *
+ * class_id examples:
+ *   "season"
+ *   "quarter"
+ *   "half"
+ *
+ * Result examples:
+ *   "spring", "summer"
+ *   "Q1", "Q4"
+ *   "H1", "H2"
+ */
+int fossil_time_calendar_get(
+    const fossil_time_date_t *dt,
+    const char *class_id,
+    char *buffer,
+    size_t buffer_size
+);
+
+/*
+ * Holiday lookup via string IDs.
+ *
+ * region_id examples:
+ *   "us"
+ *   "us_federal"
+ *   "eu"
+ *   "jp"
+ *
+ * Returns:
+ *   1 if holiday
+ *   0 if not
+ */
+int fossil_time_calendar_is_holiday(
+    const fossil_time_date_t *dt,
+    const char *region_id
+);
+
+/*
+ * If holiday, write holiday name (string ID).
+ *
+ * Example outputs:
+ *   "new_years_day"
+ *   "independence_day"
+ *   "christmas"
+ */
+int fossil_time_calendar_get_holiday(
+    const fossil_time_date_t *dt,
+    const char *region_id,
+    char *buffer,
+    size_t buffer_size
+);
 
 #ifdef __cplusplus
-} // extern "C"
+} /* extern "C" */
 #endif
+
+/* ======================================================
+ * C++ Wrapper — Thin, Inline
+ * ====================================================== */
 
 #ifdef __cplusplus
 namespace fossil {
@@ -56,16 +145,58 @@ namespace time {
 
 class Calendar {
 public:
-    static bool is_leap_year(int year);
-    static int days_in_month(int year, int month);
-    static bool is_weekend(const Date &dt);
-    static int get_quarter(const Date &dt);
-    static fossil_time_season_t get_season(const Date &dt, bool northern_hemisphere=true);
-    static int get_holiday(const Date &dt);
+    Calendar() = delete; /* static-only utility */
+
+    static inline bool is_leap_year(int32_t year) {
+        return fossil_time_calendar_is_leap_year(year) != 0;
+    }
+
+    static inline int days_in_month(int32_t year, int8_t month) {
+        return fossil_time_calendar_days_in_month(year, month);
+    }
+
+    static inline void compute_derived(Date &dt) {
+        fossil_time_calendar_compute_derived(&dt.raw);
+    }
+
+    static inline bool is(const Date &dt, const char *query_id) {
+        return fossil_time_calendar_is(&dt.raw, query_id) != 0;
+    }
+
+    static inline int get(
+        const Date &dt,
+        const char *class_id,
+        char *buffer,
+        size_t buffer_size
+    ) {
+        return fossil_time_calendar_get(
+            &dt.raw, class_id, buffer, buffer_size
+        );
+    }
+
+    static inline bool is_holiday(
+        const Date &dt,
+        const char *region_id
+    ) {
+        return fossil_time_calendar_is_holiday(
+            &dt.raw, region_id
+        ) != 0;
+    }
+
+    static inline int get_holiday(
+        const Date &dt,
+        const char *region_id,
+        char *buffer,
+        size_t buffer_size
+    ) {
+        return fossil_time_calendar_get_holiday(
+            &dt.raw, region_id, buffer, buffer_size
+        );
+    }
 };
 
-} // namespace time
-} // namespace fossil
+} /* namespace time */
+} /* namespace fossil */
 #endif
 
-#endif
+#endif /* FOSSIL_TIME_CALENDAR_H */
