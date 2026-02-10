@@ -205,7 +205,7 @@ FOSSIL_TEST(cpp_test_date_roundtrip_subsecond) {
         FOSSIL_TIME_PRECISION_YEAR | FOSSIL_TIME_PRECISION_MONTH | FOSSIL_TIME_PRECISION_DAY |
         FOSSIL_TIME_PRECISION_HOUR | FOSSIL_TIME_PRECISION_MINUTE | FOSSIL_TIME_PRECISION_SECOND |
         FOSSIL_TIME_PRECISION_MILLI | FOSSIL_TIME_PRECISION_MICRO | FOSSIL_TIME_PRECISION_NANO);
-    int64_t ns = d.to_unix_nanoseconds();
+    d.to_unix_nanoseconds();
     Date d2;
     d2.from_unix_seconds(d.to_unix_seconds());
     d2.normalize();
