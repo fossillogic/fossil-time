@@ -188,11 +188,11 @@ FOSSIL_TEST(c_test_date_format) {
         FOSSIL_TIME_PRECISION_YEAR | FOSSIL_TIME_PRECISION_MONTH | FOSSIL_TIME_PRECISION_DAY |
         FOSSIL_TIME_PRECISION_HOUR | FOSSIL_TIME_PRECISION_MINUTE | FOSSIL_TIME_PRECISION_SECOND);
     char buf[64];
-    int n = fossil_time_date_format(&dt, buf, sizeof(buf), "iso");
+    fossil_time_date_format(&dt, buf, sizeof(buf), "iso");
     ASSUME_ITS_EQUAL_CSTR(buf, "2024-06-01T12:34:56Z");
-    n = fossil_time_date_format(&dt, buf, sizeof(buf), "log");
+    fossil_time_date_format(&dt, buf, sizeof(buf), "log");
     ASSUME_ITS_EQUAL_CSTR(buf, "20240601-123456");
-    n = fossil_time_date_format(&dt, buf, sizeof(buf), "unknown");
+    fossil_time_date_format(&dt, buf, sizeof(buf), "unknown");
     ASSUME_ITS_EQUAL_CSTR(buf, "invalid_date");
 }
 
@@ -203,16 +203,16 @@ FOSSIL_TEST(c_test_date_format_smart_relative) {
         FOSSIL_TIME_PRECISION_HOUR | FOSSIL_TIME_PRECISION_MINUTE | FOSSIL_TIME_PRECISION_SECOND);
     fossil_time_date_t dt = now;
     char buf[64];
-    int n = fossil_time_date_format_smart(&dt, &now, buf, sizeof(buf));
+    fossil_time_date_format_smart(&dt, &now, buf, sizeof(buf));
     ASSUME_ITS_EQUAL_CSTR(buf, "now");
     dt.second += 10;
     fossil_time_date_normalize(&dt);
-    n = fossil_time_date_format_smart(&dt, &now, buf, sizeof(buf));
+    fossil_time_date_format_smart(&dt, &now, buf, sizeof(buf));
     ASSUME_ITS_TRUE(strstr(buf, "in 10 seconds") != NULL);
     dt = now;
     dt.second -= 5;
     fossil_time_date_normalize(&dt);
-    n = fossil_time_date_format_relative(&dt, &now, buf, sizeof(buf));
+    fossil_time_date_format_relative(&dt, &now, buf, sizeof(buf));
     ASSUME_ITS_TRUE(strstr(buf, "5 seconds ago") != NULL);
 }
 
