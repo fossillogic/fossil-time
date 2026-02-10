@@ -4,7 +4,12 @@ add_project_arguments('-D_POSIX_C_SOURCE=200112L', language: 'cpp')
 
 fossil_time_lib = library('fossil_time',
     files(
-        'date.c'),
+        'calendar.c',
+        'timer.c',
+        'sleep.c',
+        'span.c',
+        'date.c',
+),
     install: true,
     dependencies: [dependency('threads')],
     include_directories: dir)
