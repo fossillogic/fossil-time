@@ -411,6 +411,56 @@ static int fossil_pattern_match(const char *str, const char *pattern) {
     return *str == '\0';
 }
 
+static int fossil_extract_operator(
+    const char *query,
+    char *field,
+    char *op,
+    char *value
+) {
+    /* try symbolic first */
+    if (sscanf(query, "%31s %31[<>=!] %31s", field, op, value) == 3)
+        return 1;
+
+    /* English operators */
+
+    if (sscanf(query, "%31s is not %31s", field, value) == 2) {
+        strcpy(op, "!=");
+        return 1;
+    }
+
+    if (sscanf(query, "%31s is %31s", field, value) == 2) {
+        strcpy(op, "=");
+        return 1;
+    }
+
+    if (sscanf(query, "%31s equals %31s", field, value) == 2) {
+        strcpy(op, "=");
+        return 1;
+    }
+
+    if (sscanf(query, "%31s before %31s", field, value) == 2) {
+        strcpy(op, "<");
+        return 1;
+    }
+
+    if (sscanf(query, "%31s after %31s", field, value) == 2) {
+        strcpy(op, ">");
+        return 1;
+    }
+
+    if (sscanf(query, "%31s on or before %31s", field, value) == 2) {
+        strcpy(op, "<=");
+        return 1;
+    }
+
+    if (sscanf(query, "%31s on or after %31s", field, value) == 2) {
+        strcpy(op, ">=");
+        return 1;
+    }
+
+    return 0;
+}
+
 static int fossil_time_date_get_field(
     const fossil_time_date_t *dt,
     const char *field,
@@ -549,89 +599,116 @@ int fossil_time_date_search(
     const fossil_time_date_t *now,
     const char *query
 ) {
-    if (!dt || !query) {
+    if (!dt || !query || !*query)
         return 0;
-    }
 
-    /* ---- simple keywords ---- */
+    /* =========================================================
+     * SIMPLE KEYWORDS (zero parsing)
+     * ========================================================= */
 
-    if (now && (!strcmp(query, "today") || !strcmp(query, "this day"))) {
+    if (now && (!strcmp(query, "today") ||
+                !strcmp(query, "this day")))
+    {
         return dt->year  == now->year &&
                dt->month == now->month &&
                dt->day   == now->day;
     }
 
-    if (!strcmp(query, "weekend") || !strcmp(query, "is weekend")) {
+    if (!strcmp(query, "weekend") ||
+        !strcmp(query, "is weekend"))
+    {
         return dt->weekday == 0 || dt->weekday == 6;
     }
 
-    if (!strcmp(query, "weekday") || !strcmp(query, "is weekday")) {
+    if (!strcmp(query, "weekday") ||
+        !strcmp(query, "is weekday"))
+    {
         return dt->weekday >= 1 && dt->weekday <= 5;
     }
 
-    if (now && (!strcmp(query, "past") || !strcmp(query, "in the past"))) {
-        return fossil_time_date_compare(dt, now) < 0;
-    }
-
-    if (now && (!strcmp(query, "future") || !strcmp(query, "in the future"))) {
-        return fossil_time_date_compare(dt, now) > 0;
-    }
-
-    if (!strcmp(query, "leap year")) {
+    if (!strcmp(query, "leap year"))
         return is_leap(dt->year);
-    }
 
-    if (!strcmp(query, "first of month")) {
+    if (!strcmp(query, "first of month"))
         return dt->day == 1;
-    }
 
-    if (!strcmp(query, "last of month")) {
+    if (!strcmp(query, "last of month"))
         return dt->day == days_in_month(dt->year, dt->month);
+
+    /* =========================================================
+     * MINIMAL RELATIVE KEYWORDS
+     * ========================================================= */
+
+    if (now) {
+        if (!strcmp(query, "past") ||
+            !strcmp(query, "in the past"))
+            return fossil_time_date_compare(dt, now) < 0;
+
+        if (!strcmp(query, "future") ||
+            !strcmp(query, "in the future"))
+            return fossil_time_date_compare(dt, now) > 0;
+
+        if (!strcmp(query, "before today") ||
+            !strcmp(query, "before now"))
+            return fossil_time_date_compare(dt, now) < 0;
+
+        if (!strcmp(query, "after today") ||
+            !strcmp(query, "after now"))
+            return fossil_time_date_compare(dt, now) > 0;
     }
 
-    /* ---- expression form: field op value ---- */
+    /* =========================================================
+     * ADVANCED: FIELD COMPARISON (symbolic + English)
+     * ========================================================= */
 
-    char field[16];
-    char op[32];
-    int value;
+    {
+        char field[32] = {0};
+        char op[32] = {0};
+        char value_str[32] = {0};
 
-    if (sscanf(query, "%15s %15s %d", field, op, &value) == 3) {
-        int lhs;
-        if (fossil_time_date_get_field(dt, field, &lhs)) {
-            return fossil_cmp(lhs, op, value);
+        if (fossil_extract_operator(query, field, op, value_str)) {
+
+            int lhs;
+            if (!fossil_time_date_get_field(dt, field, &lhs))
+                return 0;
+
+            int rhs;
+            if (!fossil_parse_int(value_str, &rhs))
+                return 0;
+
+            return fossil_cmp(lhs, op, rhs);
         }
     }
 
-    /* ---- relative expressions ---- */
+    /* =========================================================
+     * ADVANCED: RANGE (year in 2020..2025)
+     * ========================================================= */
 
-    if (now && (!strcmp(query, "before today") || !strcmp(query, "before now"))) {
-        return fossil_time_date_compare(dt, now) < 0;
-    }
-
-    if (now && (!strcmp(query, "after today") || !strcmp(query, "after now"))) {
-        return fossil_time_date_compare(dt, now) > 0;
-    }
-
-    /* ---- range expressions: e.g. year in 2020..2025 ---- */
     {
-        int end;
-        if (sscanf(query, "%15s in %d..%d", field, &value, &end) == 3) {
+        char field[32];
+        int start, end;
+
+        if (sscanf(query, "%31s in %d..%d", field, &start, &end) == 3) {
             int lhs;
             if (fossil_time_date_get_field(dt, field, &lhs)) {
-                return lhs >= value && lhs <= end;
+                return lhs >= start && lhs <= end;
             }
+            return 0;
         }
     }
 
-    /* ---- day of week by name ---- */
+    /* =========================================================
+     * ADVANCED: WEEKDAY NAME
+     * ========================================================= */
+
     static const char *weekdays[] = {
         "sunday", "monday", "tuesday", "wednesday",
         "thursday", "friday", "saturday"
     };
+
     for (int i = 0; i < 7; ++i) {
-        if (!strcasecmp(query, weekdays[i])) {
+        if (!strcasecmp(query, weekdays[i]))
             return dt->weekday == i;
-        }
     }
 
     return 0;
