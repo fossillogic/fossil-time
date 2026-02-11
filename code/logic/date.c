@@ -339,47 +339,186 @@ int fossil_time_date_format_relative(
 
 // search logic
 
+static int fossil_match_char_class(char c, const char *pattern, int *consumed) {
+    int i = 1; /* skip '[' */
+    int match = 0;
+
+    while (pattern[i] && pattern[i] != ']') {
+        if (pattern[i+1] == '-' && pattern[i+2] && pattern[i+2] != ']') {
+            char start = pattern[i];
+            char end   = pattern[i+2];
+            if (c >= start && c <= end)
+                match = 1;
+            i += 3;
+        } else {
+            if (c == pattern[i])
+                match = 1;
+            i++;
+        }
+    }
+
+    if (pattern[i] == ']')
+        i++;
+
+    *consumed = i;
+    return match;
+}
+
+static int fossil_pattern_match(const char *str, const char *pattern) {
+    if (!pattern || !str)
+        return 0;
+
+    while (*pattern) {
+        if (*pattern == '*') {
+            pattern++;
+            if (!*pattern)
+                return 1;
+
+            while (*str) {
+                if (fossil_pattern_match(str, pattern))
+                    return 1;
+                str++;
+            }
+            return 0;
+        }
+        else if (*pattern == '?') {
+            if (!*str)
+                return 0;
+            str++;
+            pattern++;
+        }
+        else if (*pattern == '[') {
+            int consumed = 0;
+            if (!*str)
+                return 0;
+
+            if (!fossil_match_char_class(*str, pattern, &consumed))
+                return 0;
+
+            str++;
+            pattern += consumed;
+        }
+        else {
+            if (tolower((unsigned char)*str) !=
+                tolower((unsigned char)*pattern))
+                return 0;
+
+            str++;
+            pattern++;
+        }
+    }
+
+    return *str == '\0';
+}
+
 static int fossil_time_date_get_field(
     const fossil_time_date_t *dt,
     const char *field,
     int *out
 ) {
-    if (!strcmp(field, "year") || !strcmp(field, "y")) {
-        *out = dt->year; return 1;
+    if (!dt || !field || !out)
+        return 0;
+
+    /* year */
+    if (fossil_pattern_match("year", field) ||
+        fossil_pattern_match("y", field))
+    {
+        *out = dt->year;
+        return 1;
     }
-    if (!strcmp(field, "month") || !strcmp(field, "mon") || !strcmp(field, "m")) {
-        *out = dt->month; return 1;
+
+    /* month */
+    if (fossil_pattern_match("month", field) ||
+        fossil_pattern_match("mon", field) ||
+        fossil_pattern_match("m", field))
+    {
+        *out = dt->month;
+        return 1;
     }
-    if (!strcmp(field, "day") || !strcmp(field, "d")) {
-        *out = dt->day; return 1;
+
+    /* day */
+    if (fossil_pattern_match("day", field) ||
+        fossil_pattern_match("d", field))
+    {
+        *out = dt->day;
+        return 1;
     }
-    if (!strcmp(field, "hour") || !strcmp(field, "h")) {
-        *out = dt->hour; return 1;
+
+    /* hour */
+    if (fossil_pattern_match("hour", field) ||
+        fossil_pattern_match("h", field))
+    {
+        *out = dt->hour;
+        return 1;
     }
-    if (!strcmp(field, "minute") || !strcmp(field, "min")) {
-        *out = dt->minute; return 1;
+
+    /* minute */
+    if (fossil_pattern_match("minute", field) ||
+        fossil_pattern_match("min", field))
+    {
+        *out = dt->minute;
+        return 1;
     }
-    if (!strcmp(field, "second") || !strcmp(field, "sec") || !strcmp(field, "s")) {
-        *out = dt->second; return 1;
+
+    /* second */
+    if (fossil_pattern_match("second", field) ||
+        fossil_pattern_match("sec", field) ||
+        fossil_pattern_match("s", field))
+    {
+        *out = dt->second;
+        return 1;
     }
-    if (!strcmp(field, "weekday") || !strcmp(field, "wday") || !strcmp(field, "dow")) {
-        *out = dt->weekday; return 1;
+
+    /* weekday */
+    if (fossil_pattern_match("weekday", field) ||
+        fossil_pattern_match("wday", field) ||
+        fossil_pattern_match("dow", field))
+    {
+        *out = dt->weekday;
+        return 1;
     }
-    if (!strcmp(field, "yearday") || !strcmp(field, "yday")) {
-        *out = dt->yearday; return 1;
+
+    /* yearday */
+    if (fossil_pattern_match("yearday", field) ||
+        fossil_pattern_match("yday", field))
+    {
+        *out = dt->yearday;
+        return 1;
     }
-    if (!strcmp(field, "millisecond") || !strcmp(field, "ms")) {
-        *out = dt->millisecond; return 1;
+
+    /* millisecond */
+    if (fossil_pattern_match("millisecond", field) ||
+        fossil_pattern_match("ms", field))
+    {
+        *out = dt->millisecond;
+        return 1;
     }
-    if (!strcmp(field, "microsecond") || !strcmp(field, "us")) {
-        *out = dt->microsecond; return 1;
+
+    /* microsecond */
+    if (fossil_pattern_match("microsecond", field) ||
+        fossil_pattern_match("us", field))
+    {
+        *out = dt->microsecond;
+        return 1;
     }
-    if (!strcmp(field, "nanosecond") || !strcmp(field, "ns")) {
-        *out = dt->nanosecond; return 1;
+
+    /* nanosecond */
+    if (fossil_pattern_match("nanosecond", field) ||
+        fossil_pattern_match("ns", field))
+    {
+        *out = dt->nanosecond;
+        return 1;
     }
-    if (!strcmp(field, "tz_offset") || !strcmp(field, "tz") || !strcmp(field, "offset")) {
-        *out = dt->tz_offset_min; return 1;
+
+    /* timezone offset */
+    if (fossil_pattern_match("tz_offset", field) ||
+        fossil_pattern_match("tz", field) ||
+        fossil_pattern_match("offset", field))
+    {
+        *out = dt->tz_offset_min;
+        return 1;
     }
+
     return 0;
 }
 
