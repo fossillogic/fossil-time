@@ -453,7 +453,7 @@ int fossil_time_date_search(
     /* ---- expression form: field op value ---- */
 
     char field[16];
-    char op[16];
+    char op[32];
     int value;
 
     if (sscanf(query, "%15s %15s %d", field, op, &value) == 3) {
