@@ -305,13 +305,42 @@ int fossil_time_date_format_relative(
  * @brief Evaluate a search or query expression against a fossil_time_date_t structure.
  *
  * Evaluates whether the given fossil_time_date_t structure satisfies the specified
- * query expression. The query may be a keyword (e.g. "today", "weekend", "past"),
- * or a simple comparison expression using symbolic or English operators
- * (e.g. "year = 2025", "month >= 6", "weekday is not 0", "before today").
+ * query expression. The query may be one of the following:
+ *
+ * Simple keywords:
+ *   "today", "this day", "weekend", "weekday",
+ *   "leap year", "first of month", "last of month"
+ *
+ * Relative expressions (require @p now):
+ *   "past", "future", "before today", "after now",
+ *   "in the past", "in the future"
+ *
+ * Field comparison expressions using symbolic or English operators:
+ *   "year = 2025"
+ *   "month >= 6"
+ *   "weekday is not 0"
+ *   "day before 15"
+ *   "hour on or after 12"
+ *
+ * Range expressions:
+ *   "year in 2020..2025"
+ *
+ * Day-of-week names:
+ *   "monday", "tuesday", ..., "sunday"
+ *
+ * Symbolic operators supported:
+ *   =  ==  !=  <  <=  >  >=
+ *
+ * English operators supported:
+ *   is, is not, equals,
+ *   before, after,
+ *   on or before, on or after
  *
  * The optional @p now parameter provides contextual reference for relative
- * expressions such as "today", "past", or "future". If @p now is NULL, only
- * absolute field-based and context-free queries are evaluated.
+ * expressions such as "today", "past", and "future". If @p now is NULL,
+ * only absolute field-based and context-free queries are evaluated.
+ *
+ * Invalid, malformed, or unsupported queries return 0.
  *
  * @param dt    Pointer to the fossil_time_date_t structure to evaluate.
  * @param now   Pointer to the current date/time for contextual queries (may be NULL).
@@ -528,13 +557,42 @@ namespace fossil {
              * @brief Evaluate a search or query expression against a fossil_time_date_t structure.
              *
              * Evaluates whether the given fossil_time_date_t structure satisfies the specified
-             * query expression. The query may be a keyword (e.g. "today", "weekend", "past"),
-             * or a simple comparison expression using symbolic or English operators
-             * (e.g. "year = 2025", "month >= 6", "weekday is not 0", "before today").
+             * query expression. The query may be one of the following:
+             *
+             * Simple keywords:
+             *   "today", "this day", "weekend", "weekday",
+             *   "leap year", "first of month", "last of month"
+             *
+             * Relative expressions (require @p now):
+             *   "past", "future", "before today", "after now",
+             *   "in the past", "in the future"
+             *
+             * Field comparison expressions using symbolic or English operators:
+             *   "year = 2025"
+             *   "month >= 6"
+             *   "weekday is not 0"
+             *   "day before 15"
+             *   "hour on or after 12"
+             *
+             * Range expressions:
+             *   "year in 2020..2025"
+             *
+             * Day-of-week names:
+             *   "monday", "tuesday", ..., "sunday"
+             *
+             * Symbolic operators supported:
+             *   =  ==  !=  <  <=  >  >=
+             *
+             * English operators supported:
+             *   is, is not, equals,
+             *   before, after,
+             *   on or before, on or after
              *
              * The optional @p now parameter provides contextual reference for relative
-             * expressions such as "today", "past", or "future". If @p now is NULL, only
-             * absolute field-based and context-free queries are evaluated.
+             * expressions such as "today", "past", and "future". If @p now is NULL,
+             * only absolute field-based and context-free queries are evaluated.
+             *
+             * Invalid, malformed, or unsupported queries return 0.
              *
              * @param dt    Pointer to the fossil_time_date_t structure to evaluate.
              * @param now   Pointer to the current date/time for contextual queries (may be NULL).
