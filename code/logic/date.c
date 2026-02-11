@@ -24,6 +24,7 @@
  */
 #include "fossil/time/date.h"
 #include <string.h>
+#include <strings.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -473,11 +474,13 @@ int fossil_time_date_search(
     }
 
     /* ---- range expressions: e.g. year in 2020..2025 ---- */
-    if (sscanf(query, "%15s in %d..%d", field, &value, &op[0]) == 3) {
-        int lhs;
-        int end = (int)op[0];
-        if (fossil_time_date_get_field(dt, field, &lhs)) {
-            return lhs >= value && lhs <= end;
+    {
+        int end;
+        if (sscanf(query, "%15s in %d..%d", field, &value, &end) == 3) {
+            int lhs;
+            if (fossil_time_date_get_field(dt, field, &lhs)) {
+                return lhs >= value && lhs <= end;
+            }
         }
     }
 
