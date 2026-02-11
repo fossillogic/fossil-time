@@ -284,6 +284,19 @@ void fossil_time_date_from_unix_seconds(
         FOSSIL_TIME_PRECISION_SECOND;
 }
 
+// format logic
+
+int64_t fossil_time_date_to_epoch(const fossil_time_date_t *dt) {
+    struct tm t = {0};
+    t.tm_year = dt->year - 1900;
+    t.tm_mon  = dt->month - 1;
+    t.tm_mday = dt->day;
+    t.tm_hour = dt->hour;
+    t.tm_min  = dt->minute;
+    t.tm_sec  = dt->second;
+    return (int64_t)fossil_time_internal_timegm(&t);
+}
+
 int fossil_time_date_format(
     const fossil_time_date_t *dt,
     char *buffer,
