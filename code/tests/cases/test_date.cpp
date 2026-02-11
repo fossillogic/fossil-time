@@ -253,7 +253,7 @@ FOSSIL_TEST(cpp_test_date_search_field_comparisons) {
     ASSUME_ITS_TRUE(d.search(d, "day != 1"));
     ASSUME_ITS_TRUE(d.search(d, "hour > 12"));
     ASSUME_ITS_FALSE(d.search(d, "minute < 10"));
-    ASSUME_ITS_TRUE(d.search(d, "year is not 2024"));
+    ASSUME_ITS_TRUE(d.search(d, "year != 2024"));
     ASSUME_ITS_FALSE(d.search(d, "month = 1"));
 }
 
@@ -263,7 +263,7 @@ FOSSIL_TEST(cpp_test_date_search_english_operators) {
         FOSSIL_TIME_PRECISION_YEAR | FOSSIL_TIME_PRECISION_MONTH | FOSSIL_TIME_PRECISION_DAY |
         FOSSIL_TIME_PRECISION_HOUR | FOSSIL_TIME_PRECISION_MINUTE | FOSSIL_TIME_PRECISION_SECOND);
     ASSUME_ITS_TRUE(d.search(d, "year is 2023"));
-    ASSUME_ITS_TRUE(d.search(d, "month is not 1"));
+    ASSUME_ITS_TRUE(d.search(d, "month != 1"));
     ASSUME_ITS_TRUE(d.search(d, "day equals 31"));
     ASSUME_ITS_FALSE(d.search(d, "hour is 0"));
     ASSUME_ITS_TRUE(d.search(d, "minute is not 0"));
@@ -292,7 +292,7 @@ FOSSIL_TEST(cpp_test_date_search_weekday) {
         FOSSIL_TIME_PRECISION_YEAR | FOSSIL_TIME_PRECISION_MONTH | FOSSIL_TIME_PRECISION_DAY);
     d.normalize();
     ASSUME_ITS_TRUE(d.search(d, "weekday is 6"));
-    ASSUME_ITS_TRUE(d.search(d, "weekday is not 0"));
+    ASSUME_ITS_TRUE(d.search(d, "weekday != 0"));
     ASSUME_ITS_FALSE(d.search(d, "weekday is 0"));
 }
 
