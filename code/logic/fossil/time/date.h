@@ -104,10 +104,6 @@ typedef struct fossil_time_date_t {
  * C API — Core
  * ====================================================== */
 
-/* ======================================================
- * C API — Core
- * ====================================================== */
-
 /**
  * @brief Populate the fossil_time_date_t structure with the current system time.
  *
