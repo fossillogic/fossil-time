@@ -11,12 +11,10 @@ fossil_time_lib = library('fossil_time',
         'date.c',
 ),
     install: true,
-    dependencies: [dependency('threads')],
     include_directories: dir)
 
 fossil_time_dep = declare_dependency(
     link_with: [fossil_time_lib],
-    dependencies: [dependency('threads')],
     include_directories: dir)
 
 meson.override_dependency('fossil-time', fossil_time_dep)
