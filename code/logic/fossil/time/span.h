@@ -290,36 +290,74 @@ class Span {
 public:
     fossil_time_span_t raw;
 
+    /**
+     * Default constructor.
+     * Initializes the Span object without modifying its contents.
+     */
     Span() { }
 
+    /**
+     * Clear all fields of the span, including the precision mask.
+     * Useful for initializing or resetting the span.
+     */
     inline void clear() {
         fossil_time_span_clear(&raw);
     }
 
+    /**
+     * Validate the contents of the span.
+     * Returns true if all fields are within expected ranges.
+     */
     inline bool validate() const {
         return fossil_time_span_validate(&raw) != 0;
     }
 
+    /**
+     * Normalize the span fields, carrying overflow from lower units to higher units.
+     * Updates the precision mask accordingly.
+     */
     inline void normalize() {
         fossil_time_span_normalize(&raw);
     }
 
+    /**
+     * Set the span using a value and unit string.
+     * Only the specified unit field is set; others are zeroed.
+     * Updates the precision mask.
+     */
     inline void from_unit(int64_t value, const char *unit_id) {
         fossil_time_span_from_unit(&raw, value, unit_id);
     }
 
+    /**
+     * Set the span using a semantic or AI-friendly hint string.
+     * The mapping of hints to durations is implementation-defined.
+     */
     inline void from_ai(const char *hint_id) {
         fossil_time_span_from_ai(&raw, hint_id);
     }
 
+    /**
+     * Convert the span to total seconds.
+     * Aggregates all fields into a single integer value in seconds.
+     */
     inline int64_t to_seconds() const {
         return fossil_time_span_to_seconds(&raw);
     }
 
+    /**
+     * Convert the span to total nanoseconds.
+     * Aggregates all fields into a single integer value in nanoseconds.
+     */
     inline int64_t to_nanoseconds() const {
         return fossil_time_span_to_nanoseconds(&raw);
     }
 
+    /**
+     * Format the span as a string according to the specified format.
+     * Writes the formatted string to the provided buffer.
+     * Returns the number of characters written, or negative on error.
+     */
     inline int format(
         char *buffer,
         size_t buffer_size,
@@ -328,12 +366,22 @@ public:
         return fossil_time_span_format(&raw, buffer, buffer_size, format_id);
     }
 
+    /**
+     * Add two spans together.
+     * Returns a new Span representing the sum.
+     * The result is not automatically normalized.
+     */
     static inline Span add(const Span &a, const Span &b) {
         Span out;
         fossil_time_span_add(&out.raw, &a.raw, &b.raw);
         return out;
     }
 
+    /**
+     * Subtract one span from another.
+     * Returns a new Span representing the difference.
+     * The result is not automatically normalized.
+     */
     static inline Span sub(const Span &a, const Span &b) {
         Span out;
         fossil_time_span_sub(&out.raw, &a.raw, &b.raw);
