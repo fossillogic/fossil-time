@@ -5,6 +5,7 @@ FROM fedora:34
 ENV TZ=UTC
 
 # Install system dependencies and clean up
+RUN dnf config-manager --disable fedora-modular
 RUN dnf clean metadata \
     && dnf -y update \
     && dnf -y groupinstall "Development Tools" \
