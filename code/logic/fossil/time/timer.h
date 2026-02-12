@@ -47,24 +47,64 @@ typedef struct fossil_time_timer_t {
  * C API — Core
  * ====================================================== */
 
-/* Initialize / reset timer */
+/**
+ * @brief Initialize or reset the timer to the current monotonic time.
+ *
+ * This function sets the timer's start point to the current monotonic
+ * time in nanoseconds. Use this to begin or restart timing.
+ *
+ * @param timer Pointer to a fossil_time_timer_t structure to initialize.
+ */
 void fossil_time_timer_start(
     fossil_time_timer_t *timer
 );
 
-/* Elapsed time since start */
+/**
+ * @brief Get the elapsed time in nanoseconds since the timer was started.
+ *
+ * Returns the difference between the current monotonic time and the timer's
+ * start point, in nanoseconds.
+ *
+ * @param timer Pointer to a fossil_time_timer_t structure.
+ * @return Elapsed time in nanoseconds.
+ */
 uint64_t fossil_time_timer_elapsed_ns(
     const fossil_time_timer_t *timer
 );
 
+/**
+ * @brief Get the elapsed time in microseconds since the timer was started.
+ *
+ * Returns the elapsed time in microseconds, derived from the monotonic clock.
+ *
+ * @param timer Pointer to a fossil_time_timer_t structure.
+ * @return Elapsed time in microseconds.
+ */
 uint64_t fossil_time_timer_elapsed_us(
     const fossil_time_timer_t *timer
 );
 
+/**
+ * @brief Get the elapsed time in milliseconds since the timer was started.
+ *
+ * Returns the elapsed time in milliseconds, derived from the monotonic clock.
+ *
+ * @param timer Pointer to a fossil_time_timer_t structure.
+ * @return Elapsed time in milliseconds.
+ */
 uint64_t fossil_time_timer_elapsed_ms(
     const fossil_time_timer_t *timer
 );
 
+/**
+ * @brief Get the elapsed time in seconds since the timer was started.
+ *
+ * Returns the elapsed time as a double-precision floating point value
+ * in seconds, derived from the monotonic clock.
+ *
+ * @param timer Pointer to a fossil_time_timer_t structure.
+ * @return Elapsed time in seconds.
+ */
 double fossil_time_timer_elapsed_sec(
     const fossil_time_timer_t *timer
 );
@@ -73,9 +113,15 @@ double fossil_time_timer_elapsed_sec(
  * C API — Convenience
  * ====================================================== */
 
-/*
- * Measure elapsed time and reset start point.
- * Useful for frame timing, ticks, loops.
+/**
+ * @brief Measure elapsed time and reset the timer's start point.
+ *
+ * Returns the elapsed time in nanoseconds since the last start or lap,
+ * and resets the timer's start point to the current time.
+ * Useful for measuring intervals in loops or frames.
+ *
+ * @param timer Pointer to a fossil_time_timer_t structure.
+ * @return Elapsed time in nanoseconds.
  */
 uint64_t fossil_time_timer_lap_ns(
     fossil_time_timer_t *timer
@@ -85,15 +131,15 @@ uint64_t fossil_time_timer_lap_ns(
  * C API — AI / Hint-Based Timing
  * ====================================================== */
 
-/*
- * Interpret a timing hint and return a duration in nanoseconds.
+/**
+ * @brief Interpret a timing hint and return a duration in nanoseconds.
  *
- * hint_id examples:
- *   "frame"        -> ~16ms
- *   "tick"         -> small scheduler quantum
- *   "yield"        -> minimal pause
- *   "human_short"  -> ~250ms
- *   "human_long"   -> ~2s
+ * Converts a string-based timing hint (e.g., "frame", "tick", "yield",
+ * "human_short", "human_long") into a recommended duration in nanoseconds.
+ * Useful for AI, scheduling, or human-centric timing.
+ *
+ * @param hint_id String identifier for the timing hint.
+ * @return Duration in nanoseconds corresponding to the hint.
  */
 uint64_t fossil_time_timer_hint_ns(
     const char *hint_id
@@ -111,36 +157,109 @@ uint64_t fossil_time_timer_hint_ns(
 namespace fossil {
 namespace time {
 
+/**
+ * @brief C++ wrapper class for fossil_time_timer_t.
+ *
+ * Provides a thin, inline, ABI-safe interface for monotonic timing
+ * using the Fossil Time C API. This class allows convenient usage
+ * of timer functionality in C++ code, including starting, measuring
+ * elapsed time in various units, performing lap measurements, and
+ * interpreting timing hints.
+ */
 class Timer {
 public:
+    /**
+     * @brief The underlying C timer structure.
+     */
     fossil_time_timer_t raw;
 
+    /**
+     * @brief Default constructor.
+     *
+     * Constructs a Timer object. The timer is not started automatically;
+     * call start() to begin timing.
+     */
     Timer() { }
 
+    /**
+     * @brief Start or reset the timer to the current monotonic time.
+     *
+     * Sets the timer's start point to the current monotonic time in nanoseconds.
+     * Use this to begin or restart timing.
+     */
     inline void start() {
         fossil_time_timer_start(&raw);
     }
 
+    /**
+     * @brief Get the elapsed time in nanoseconds since the timer was started.
+     *
+     * Returns the difference between the current monotonic time and the timer's
+     * start point, in nanoseconds.
+     *
+     * @return Elapsed time in nanoseconds.
+     */
     inline uint64_t elapsed_ns() const {
         return fossil_time_timer_elapsed_ns(&raw);
     }
 
+    /**
+     * @brief Get the elapsed time in microseconds since the timer was started.
+     *
+     * Returns the elapsed time in microseconds, derived from the monotonic clock.
+     *
+     * @return Elapsed time in microseconds.
+     */
     inline uint64_t elapsed_us() const {
         return fossil_time_timer_elapsed_us(&raw);
     }
 
+    /**
+     * @brief Get the elapsed time in milliseconds since the timer was started.
+     *
+     * Returns the elapsed time in milliseconds, derived from the monotonic clock.
+     *
+     * @return Elapsed time in milliseconds.
+     */
     inline uint64_t elapsed_ms() const {
         return fossil_time_timer_elapsed_ms(&raw);
     }
 
+    /**
+     * @brief Get the elapsed time in seconds since the timer was started.
+     *
+     * Returns the elapsed time as a double-precision floating point value
+     * in seconds, derived from the monotonic clock.
+     *
+     * @return Elapsed time in seconds.
+     */
     inline double elapsed_sec() const {
         return fossil_time_timer_elapsed_sec(&raw);
     }
 
+    /**
+     * @brief Measure elapsed time and reset the timer's start point.
+     *
+     * Returns the elapsed time in nanoseconds since the last start or lap,
+     * and resets the timer's start point to the current time.
+     * Useful for measuring intervals in loops or frames.
+     *
+     * @return Elapsed time in nanoseconds.
+     */
     inline uint64_t lap_ns() {
         return fossil_time_timer_lap_ns(&raw);
     }
 
+    /**
+     * @brief Interpret a timing hint and return a duration in nanoseconds.
+     *
+     * Converts a string-based timing hint (e.g., "frame", "tick", "yield",
+     * "human_short", "human_long") into a recommended duration in nanoseconds.
+     * Useful for AI, scheduling, or human-centric timing.
+     *
+     * @param hint_id String identifier for the timing hint.
+     * @return Duration in nanoseconds corresponding to the hint.
+     */
     static inline uint64_t hint_ns(const char *hint_id) {
         return fossil_time_timer_hint_ns(hint_id);
     }

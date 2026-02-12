@@ -1,16 +1,38 @@
 # **Fossil Time by Fossil Logic**
 
-Fossil Time is a modern, portable C library for handling time and date operations with precision, clarity, and human-friendly features. It provides a complete suite of utilities for working with datetimes, durations, monotonic timers, calendar logic, sleep routines, and human-aware scheduling.
-
-The library is designed around deterministic behavior, explicit types, and string-based identifiers for formats, units, and semantic concepts, making it safe, predictable, and suitable for embedded systems, servers, and CLIs. Its API is intuitive and modular, allowing developers to write code that is readable and maintainable while supporting advanced time operations.
+Fossil Time is a modern, portable C library built for lossless, precision-aware time and date computation. It models time as an explicit, maximally expressive structure—from calendar fields to SI sub-second units down to yoctoseconds—governed by a precision mask that allows partial, fuzzy, or fully scientific timestamps. Its modular API provides reliable sleep routines, robust parsing and formatting, leap-year and weekday logic, monotonic timers for accurate interval measurement, and explicit types for durations and spans. String-based identifiers for formats, units, and operations provide clarity, safety, and extensibility—eliminating fragile enum coupling while enabling dynamic reasoning and AI-assisted workflows. Designed for embedded systems, servers, CLI tools, and high-integrity applications, Fossil Time emphasizes deterministic behavior, composability, and maintainable code without sacrificing human readability or scientific rigor.
 
 ## Key Features
 
-1. **Cross-Platform Compatibility**: Provides a uniform interface and consistent behavior across major operating systems, including Windows, macOS, and Linux.
-2. **Modular Design**: Contains modular components that can be easily integrated and customized for specific project needs.
-3. **Efficient Build System**: Built using the Meson build system, which ensures fast build times and a straightforward development process.
-4. **High Performance**: Developed in C and C++ to maximize performance and resource efficiency, suitable for both desktop and embedded systems.
-5. **Extensive Documentation**: Offers comprehensive documentation and examples to help developers quickly understand and utilize the library.
+1. **Lossless, Precision-Aware Time Model**  
+    Represents time with a maximally expressive structure, from calendar fields down to SI sub-second units (milliseconds to yoctoseconds), preserving exact precision without hidden rounding.
+
+2. **Precision Mask Semantics**  
+    Every field is governed by a bitmask that explicitly defines what is known, enabling partial dates, fuzzy timestamps, scientific measurements, and AI-friendly reasoning.
+
+3. **String-Based Identifiers**  
+    Uses string IDs for formats, units, and operations instead of fragile enums, improving extensibility, safety, introspection, and dynamic integration.
+
+4. **Robust Parsing & Formatting Engine**  
+    Supports deterministic, mask-aware parsing and formatting with ISO, log, and customizable representations that respect actual precision.
+
+5. **Monotonic & High-Resolution Timing**  
+    Provides reliable monotonic clocks for accurate elapsed-time measurement, benchmarking, and interval tracking.
+
+6. **Explicit Duration & Interval Types**  
+    Distinguishes clearly between instants, durations, and spans, reducing ambiguity and improving correctness in time arithmetic.
+
+7. **Calendar & Chronological Logic**  
+    Built-in support for leap years, weekdays, yeardays, and calendar-safe calculations without relying on platform quirks.
+
+8. **Cross-Platform Consistency**  
+    Delivers uniform behavior across Windows, macOS, Linux, and embedded environments with predictable results.
+
+9. **Modular, Composable Architecture**  
+    Designed as independent components that can be integrated selectively, making it suitable for embedded systems, servers, and CLI tools.
+
+10. **Deterministic, AI-Ready Design**  
+     Structured for machine reasoning, validation, and symbolic manipulation—making it well-suited for intelligent systems, code generation, and advanced automation workflows.
 
 ## Getting Started
 
