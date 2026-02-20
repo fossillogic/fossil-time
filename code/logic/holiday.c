@@ -82,17 +82,6 @@ static void nth_weekday(int year, int month, int weekday, int nth,
     set_date(out,year,month,d);
 }
 
-/* last weekday of month */
-static void last_weekday(int year,int month,int weekday,
-                         fossil_time_date_t *out)
-{
-    int d = days_in_month(year,month);
-    int w = weekday_of(year,month,d);
-    int delta = (w - weekday + 7) % 7;
-    d -= delta;
-    set_date(out,year,month,d);
-}
-
 /* observed rule: if Sat→Fri, Sun→Mon */
 static void apply_observed(fossil_time_date_t *dt)
 {
