@@ -124,73 +124,71 @@ int fossil_holiday_list(int year, fossil_time_date_t *out_dates, size_t max_entr
 #include <vector>
 #include <string>
 
-namespace fossil {
-    namespace time {
+namespace fossil::time {
 
-        class Holiday {
-        public:
-            std::string name;
-            fossil_holiday_type_t type;
-            int month;
-            int day;
-            int weekday;
-            int nth;
-            int offset_days;
-            std::string relative_to;
-
-            Holiday() : type(FOSSIL_HOLIDAY_CUSTOM), month(0), day(0),
-                        weekday(-1), nth(0), offset_days(0) {}
-
-            /* Register this holiday */
-            inline int register_holiday() const {
-                fossil_holiday_t h;
-                h.name = name.c_str();
-                h.type = type;
-                h.month = month;
-                h.day = day;
-                h.weekday = weekday;
-                h.nth = nth;
-                h.offset_days = offset_days;
-                h.relative_to = relative_to.empty() ? NULL : relative_to.c_str();
-                return fossil_holiday_register(&h);
+    class Holiday {
+    public:
+        std::string name;
+        fossil_holiday_type_t type;
+        int month;
+        int day;
+        int weekday;
+        int nth;
+        int offset_days;
+        std::string relative_to;
+    
+        Holiday() : type(FOSSIL_HOLIDAY_CUSTOM), month(0), day(0),
+                    weekday(-1), nth(0), offset_days(0) {}
+    
+        /* Register this holiday */
+        inline int register_holiday() const {
+            fossil_holiday_t h;
+            h.name = name.c_str();
+            h.type = type;
+            h.month = month;
+            h.day = day;
+            h.weekday = weekday;
+            h.nth = nth;
+            h.offset_days = offset_days;
+            h.relative_to = relative_to.empty() ? NULL : relative_to.c_str();
+            return fossil_holiday_register(&h);
+        }
+    
+        /* Compute the date in a given year */
+        inline fossil_time_date_t date(int year) const {
+            fossil_time_date_t dt;
+            fossil_holiday_t h;
+            h.name = name.c_str();
+            h.type = type;
+            h.month = month;
+            h.day = day;
+            h.weekday = weekday;
+            h.nth = nth;
+            h.offset_days = offset_days;
+            h.relative_to = relative_to.empty() ? NULL : relative_to.c_str();
+            fossil_holiday_date(&h, year, &dt);
+            return dt;
+        }
+    
+        /* Check if a date matches this holiday */
+        inline bool is(const fossil_time_date_t &date) const {
+            const char* out_name = nullptr;
+            if (fossil_holiday_is(&date, &out_name)) {
+                return name == out_name;
             }
-
-            /* Compute the date in a given year */
-            inline fossil_time_date_t date(int year) const {
-                fossil_time_date_t dt;
-                fossil_holiday_t h;
-                h.name = name.c_str();
-                h.type = type;
-                h.month = month;
-                h.day = day;
-                h.weekday = weekday;
-                h.nth = nth;
-                h.offset_days = offset_days;
-                h.relative_to = relative_to.empty() ? NULL : relative_to.c_str();
-                fossil_holiday_date(&h, year, &dt);
-                return dt;
-            }
-
-            /* Check if a date matches this holiday */
-            inline bool is(const fossil_time_date_t &date) const {
-                const char* out_name = nullptr;
-                if (fossil_holiday_is(&date, &out_name)) {
-                    return name == out_name;
-                }
-                return false;
-            }
-        };
-
-        /* Convenience functions */
-        std::vector<fossil_time_date_t> list_holidays(int year, size_t max_entries = 128) {
+            return false;
+        }
+    
+        /* List all holidays in a year (static) */
+        static std::vector<fossil_time_date_t> list(int year, size_t max_entries = 128) {
             std::vector<fossil_time_date_t> vec(max_entries);
             size_t count = 0;
             fossil_holiday_list(year, vec.data(), max_entries, &count);
             vec.resize(count);
             return vec;
         }
+    };
 
-    } /* namespace time */
 } /* namespace fossil */
 
 #endif
