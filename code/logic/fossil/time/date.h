@@ -402,6 +402,79 @@ namespace fossil {
                 raw.precision_mask = 0;
             }
 
+            /**
+             * @brief Constructor from fossil_time_date_t structure.
+             * Initializes this Date object with the contents of an existing structure.
+             */
+            explicit Date(const fossil_time_date_t &dt) : raw(dt) {}
+
+            /**
+             * @brief Constructor with year, month, and day.
+             * Initializes the calendar fields and sets the precision_mask accordingly.
+             */
+            Date(int32_t y, int8_t m, int8_t d) {
+                raw.year           = y;
+                raw.month          = m;
+                raw.day            = d;
+                
+                raw.hour           = 0;
+                raw.minute         = 0;
+                raw.second         = 0;
+                
+                raw.millisecond    = 0;
+                raw.microsecond    = 0;
+                raw.nanosecond     = 0;
+                raw.picosecond     = 0;
+                raw.femtosecond    = 0;
+                raw.attosecond     = 0;
+                raw.zeptosecond    = 0;
+                raw.yoctosecond    = 0;
+                
+                raw.weekday        = -1;
+                raw.yearday        = -1;
+                
+                raw.tz_offset_min  = 0;
+                
+                raw.precision_mask = FOSSIL_TIME_PRECISION_YEAR |
+                                     FOSSIL_TIME_PRECISION_MONTH |
+                                     FOSSIL_TIME_PRECISION_DAY;
+            }
+
+            /**
+             * @brief Constructor with full date and time.
+             * Initializes all calendar and clock fields with maximal precision.
+             */
+            Date(int32_t y, int8_t m, int8_t d, int8_t h, int8_t min, int8_t s) {
+                raw.year           = y;
+                raw.month          = m;
+                raw.day            = d;
+                
+                raw.hour           = h;
+                raw.minute         = min;
+                raw.second         = s;
+                
+                raw.millisecond    = 0;
+                raw.microsecond    = 0;
+                raw.nanosecond     = 0;
+                raw.picosecond     = 0;
+                raw.femtosecond    = 0;
+                raw.attosecond     = 0;
+                raw.zeptosecond    = 0;
+                raw.yoctosecond    = 0;
+                
+                raw.weekday        = -1;
+                raw.yearday        = -1;
+                
+                raw.tz_offset_min  = 0;
+                
+                raw.precision_mask = FOSSIL_TIME_PRECISION_YEAR |
+                                     FOSSIL_TIME_PRECISION_MONTH |
+                                     FOSSIL_TIME_PRECISION_DAY |
+                                     FOSSIL_TIME_PRECISION_HOUR |
+                                     FOSSIL_TIME_PRECISION_MINUTE |
+                                     FOSSIL_TIME_PRECISION_SECOND;
+            }
+
             /* ======================================================
              * Core
              * ====================================================== */
