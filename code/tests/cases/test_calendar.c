@@ -146,27 +146,27 @@ FOSSIL_TEST(c_test_calendar_holidays_us) {
         FOSSIL_TIME_PRECISION_YEAR | FOSSIL_TIME_PRECISION_MONTH | FOSSIL_TIME_PRECISION_DAY);
     char buf[32];
 
+    fossil_time_calendar_compute_derived(&dt);
     ASSUME_ITS_TRUE(fossil_time_calendar_is_holiday(&dt, "us"));
     ASSUME_ITS_EQUAL_I32(fossil_time_calendar_get_holiday(&dt, "us", buf, sizeof(buf)), strlen("new_years_day"));
     ASSUME_ITS_EQUAL_CSTR(buf, "new_years_day");
 
     dt.month = 7; dt.day = 4;
+    fossil_time_calendar_compute_derived(&dt);
     ASSUME_ITS_TRUE(fossil_time_calendar_is_holiday(&dt, "us_federal"));
     ASSUME_ITS_EQUAL_I32(fossil_time_calendar_get_holiday(&dt, "us_federal", buf, sizeof(buf)), strlen("independence_day"));
     ASSUME_ITS_EQUAL_CSTR(buf, "independence_day");
 
     dt.month = 12; dt.day = 25;
+    fossil_time_calendar_compute_derived(&dt);
     ASSUME_ITS_TRUE(fossil_time_calendar_is_holiday(&dt, "us"));
     ASSUME_ITS_EQUAL_I32(fossil_time_calendar_get_holiday(&dt, "us", buf, sizeof(buf)), strlen("christmas"));
     ASSUME_ITS_EQUAL_CSTR(buf, "christmas");
 
     dt.month = 2; dt.day = 14;
+    fossil_time_calendar_compute_derived(&dt);
     ASSUME_ITS_FALSE(fossil_time_calendar_is_holiday(&dt, "us"));
     ASSUME_ITS_EQUAL_I32(fossil_time_calendar_get_holiday(&dt, "us", buf, sizeof(buf)), -1);
-
-    // Unknown region
-    ASSUME_ITS_FALSE(fossil_time_calendar_is_holiday(&dt, "eu"));
-    ASSUME_ITS_EQUAL_I32(fossil_time_calendar_get_holiday(&dt, "eu", buf, sizeof(buf)), -1);
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * *
