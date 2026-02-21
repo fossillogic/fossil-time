@@ -43,6 +43,26 @@ FOSSIL_TEARDOWN(c_holiday_suite) {
 // as samples for library usage.
 // * * * * * * * * * * * * * * * * * * * * * * * *
 
+// Helper: create a fossil_time_date_t with given fields and mask
+static fossil_time_date_t make_date(
+    int year, int month, int day, int hour, int min, int sec,
+    int ms, int us, int ns, uint64_t mask
+) {
+    fossil_time_date_t dt;
+    memset(&dt, 0, sizeof(dt));
+    dt.year = year;
+    dt.month = month;
+    dt.day = day;
+    dt.hour = hour;
+    dt.minute = min;
+    dt.second = sec;
+    dt.millisecond = ms;
+    dt.microsecond = us;
+    dt.nanosecond = ns;
+    dt.precision_mask = mask;
+    return dt;
+}
+
 // Test: fossil_holiday_register and fossil_holiday_get
 FOSSIL_TEST(c_test_holiday_register_get) {
     fossil_holiday_t custom = {
