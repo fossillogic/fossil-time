@@ -215,16 +215,110 @@ int fossil_time_calendar_get_holiday(
         !strcmp(region_id, "us_federal")) {
 
         /* New Year's Day */
-        if (dt->month == 1 && dt->day == 1)
-            return snprintf(buffer, buffer_size, "new_years_day");
+        if (dt->month == 1 && dt->day == 1) {
+            snprintf(buffer, buffer_size, "new_years_day");
+            return strlen("new_years_day");
+        }
+
+        /* MLK Jr. Day (3rd Monday in January) */
+        if (dt->month == 1 && dt->weekday == 1 && dt->day >= 15 && dt->day <= 21) {
+            snprintf(buffer, buffer_size, "mlk_day");
+            return strlen("mlk_day");
+        }
+
+        /* Presidents' Day (3rd Monday in February) */
+        if (dt->month == 2 && dt->weekday == 1 && dt->day >= 15 && dt->day <= 21) {
+            snprintf(buffer, buffer_size, "presidents_day");
+            return strlen("presidents_day");
+        }
+
+        /* Memorial Day (last Monday in May) */
+        if (dt->month == 5 && dt->weekday == 1 && dt->day >= 25) {
+            snprintf(buffer, buffer_size, "memorial_day");
+            return strlen("memorial_day");
+        }
 
         /* Independence Day */
-        if (dt->month == 7 && dt->day == 4)
-            return snprintf(buffer, buffer_size, "independence_day");
+        if (dt->month == 7 && dt->day == 4) {
+            snprintf(buffer, buffer_size, "independence_day");
+            return strlen("independence_day");
+        }
+
+        /* Labor Day (1st Monday in September) */
+        if (dt->month == 9 && dt->weekday == 1 && dt->day <= 7) {
+            snprintf(buffer, buffer_size, "labor_day");
+            return strlen("labor_day");
+        }
+
+        /* Columbus Day (2nd Monday in October) */
+        if (dt->month == 10 && dt->weekday == 1 && dt->day >= 8 && dt->day <= 14) {
+            snprintf(buffer, buffer_size, "columbus_day");
+            return strlen("columbus_day");
+        }
+
+        /* Veterans Day */
+        if (dt->month == 11 && dt->day == 11) {
+            snprintf(buffer, buffer_size, "veterans_day");
+            return strlen("veterans_day");
+        }
+
+        /* Thanksgiving (4th Thursday in November) */
+        if (dt->month == 11 && dt->weekday == 4 && dt->day >= 22 && dt->day <= 28) {
+            snprintf(buffer, buffer_size, "thanksgiving");
+            return strlen("thanksgiving");
+        }
 
         /* Christmas */
-        if (dt->month == 12 && dt->day == 25)
-            return snprintf(buffer, buffer_size, "christmas");
+        if (dt->month == 12 && dt->day == 25) {
+            snprintf(buffer, buffer_size, "christmas");
+            return strlen("christmas");
+        }
+    }
+
+    /* Minimal UK baseline */
+    if (!strcmp(region_id, "uk") ||
+        !strcmp(region_id, "gb")) {
+
+        /* New Year's Day */
+        if (dt->month == 1 && dt->day == 1) {
+            snprintf(buffer, buffer_size, "new_years_day");
+            return strlen("new_years_day");
+        }
+
+        /* Christmas Day */
+        if (dt->month == 12 && dt->day == 25) {
+            snprintf(buffer, buffer_size, "christmas");
+            return strlen("christmas");
+        }
+
+        /* Boxing Day */
+        if (dt->month == 12 && dt->day == 26) {
+            snprintf(buffer, buffer_size, "boxing_day");
+            return strlen("boxing_day");
+        }
+    }
+
+    /* Minimal Canada baseline */
+    if (!strcmp(region_id, "ca") ||
+        !strcmp(region_id, "canada")) {
+
+        /* New Year's Day */
+        if (dt->month == 1 && dt->day == 1) {
+            snprintf(buffer, buffer_size, "new_years_day");
+            return strlen("new_years_day");
+        }
+
+        /* Canada Day */
+        if (dt->month == 7 && dt->day == 1) {
+            snprintf(buffer, buffer_size, "canada_day");
+            return strlen("canada_day");
+        }
+
+        /* Christmas Day */
+        if (dt->month == 12 && dt->day == 25) {
+            snprintf(buffer, buffer_size, "christmas");
+            return strlen("christmas");
+        }
     }
 
     return -1;
