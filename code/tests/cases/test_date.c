@@ -169,8 +169,10 @@ FOSSIL_TEST(c_test_date_format) {
     char buf[64];
     fossil_time_date_format(&dt, buf, sizeof(buf), "iso");
     ASSUME_ITS_EQUAL_CSTR(buf, "2024-06-01T12:34:56Z");
+    memset(buf, 0, sizeof(buf));
     fossil_time_date_format(&dt, buf, sizeof(buf), "log");
     ASSUME_ITS_EQUAL_CSTR(buf, "20240601-123456");
+    memset(buf, 0, sizeof(buf));
     fossil_time_date_format(&dt, buf, sizeof(buf), "unknown");
     ASSUME_ITS_EQUAL_CSTR(buf, "invalid_date");
 }

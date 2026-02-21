@@ -9,6 +9,8 @@ fossil_time_lib = library('fossil_time',
         'sleep.c',
         'span.c',
         'date.c',
+        'season.c',
+        'holiday.c',
 ),
     install: true,
     include_directories: dir)

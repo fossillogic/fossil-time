@@ -30,5 +30,7 @@
 #include "calendar.h"
 #include "timer.h"
 #include "span.h"
+#include "season.h"
+#include "holiday.h"
 
 #endif /* FOSSIL_TIME_FRAMEWORK_H */
