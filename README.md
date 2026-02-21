@@ -55,7 +55,7 @@ Add the `fossil-time.wrap` file in your `subprojects` directory and include the 
 ```ini
 [wrap-git]
 url = https://github.com/fossillogic/fossil-time.git
-revision = v0.1.0
+revision = v0.1.1
 
 [provide]
 dependency_names = fossil-time
