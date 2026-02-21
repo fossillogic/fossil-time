@@ -43,6 +43,26 @@ FOSSIL_TEARDOWN(cpp_season_suite) {
 // as samples for library usage.
 // * * * * * * * * * * * * * * * * * * * * * * * *
 
+// Helper: create a fossil_time_date_t with given fields and mask
+static fossil_time_date_t make_date(
+    int year, int month, int day, int hour, int min, int sec,
+    int ms, int us, int ns, uint64_t mask
+) {
+    fossil_time_date_t dt;
+    memset(&dt, 0, sizeof(dt));
+    dt.year = year;
+    dt.month = month;
+    dt.day = day;
+    dt.hour = hour;
+    dt.minute = min;
+    dt.second = sec;
+    dt.millisecond = ms;
+    dt.microsecond = us;
+    dt.nanosecond = ns;
+    dt.precision_mask = mask;
+    return dt;
+}
+
 // Test: fossil_season_of with meteorological system (Northern hemisphere)
 FOSSIL_TEST(cpp_test_season_of_meteorological_northern) {
     fossil::time::Date date(2024, 3, 15);
