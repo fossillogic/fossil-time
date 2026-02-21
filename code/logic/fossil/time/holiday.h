@@ -137,10 +137,25 @@ namespace fossil::time {
         int offset_days;
         std::string relative_to;
     
+        /**
+         * @brief Default constructor for Holiday.
+         * 
+         * Initializes a Holiday object with default values. The type is set to
+         * FOSSIL_HOLIDAY_CUSTOM, month and day are 0, weekday is -1 (invalid),
+         * nth and offset_days are 0, and relative_to is empty.
+         */
         Holiday() : type(FOSSIL_HOLIDAY_CUSTOM), month(0), day(0),
                     weekday(-1), nth(0), offset_days(0) {}
     
-        /* Register this holiday */
+        /**
+         * @brief Register this holiday with the holiday registry.
+         * 
+         * Converts the C++ Holiday object to a C struct (fossil_holiday_t) and
+         * registers it with the fossil holiday system. This makes the holiday
+         * available for date computations and queries.
+         * 
+         * @return 0 on success, non-zero on error.
+         */
         inline int register_holiday() const {
             fossil_holiday_t h;
             h.name = name.c_str();
@@ -154,7 +169,16 @@ namespace fossil::time {
             return fossil_holiday_register(&h);
         }
     
-        /* Compute the date in a given year */
+        /**
+         * @brief Compute the date of this holiday for a given year.
+         * 
+         * Calculates when this holiday falls in the specified year, taking into
+         * account its type (fixed, weekday-based, relative, or custom). Returns
+         * a fossil_time_date_t structure containing the computed date.
+         * 
+         * @param year The year for which to compute the holiday date.
+         * @return A fossil_time_date_t structure with the computed holiday date.
+         */
         inline fossil_time_date_t date(int year) const {
             fossil_time_date_t dt;
             fossil_holiday_t h;
@@ -170,7 +194,16 @@ namespace fossil::time {
             return dt;
         }
     
-        /* Check if a date matches this holiday */
+        /**
+         * @brief Check if a given date matches this holiday.
+         * 
+         * Determines whether the provided date corresponds to this specific holiday.
+         * Compares the computed holiday date for the given year against the
+         * provided date.
+         * 
+         * @param date The date to check against this holiday.
+         * @return true if the date matches this holiday, false otherwise.
+         */
         inline bool is(const fossil_time_date_t &date) const {
             const char* out_name = nullptr;
             if (fossil_holiday_is(&date, &out_name)) {
@@ -179,7 +212,17 @@ namespace fossil::time {
             return false;
         }
     
-        /* List all holidays in a year (static) */
+        /**
+         * @brief List all registered holidays in a given year.
+         * 
+         * Retrieves a vector of all holiday dates for the specified year from
+         * the fossil holiday registry. The number of holidays returned depends
+         * on how many holidays are registered in the system.
+         * 
+         * @param year The year for which to list holidays.
+         * @param max_entries Maximum number of holiday entries to retrieve (default 128).
+         * @return A vector of fossil_time_date_t structures containing all holidays in the year.
+         */
         static std::vector<fossil_time_date_t> list(int year, size_t max_entries = 128) {
             std::vector<fossil_time_date_t> vec(max_entries);
             size_t count = 0;

@@ -129,9 +129,29 @@ class Season {
 public:
     fossil_season_t value;
 
+    /**
+     * @brief Default constructor.
+     * Initializes the Season with an unknown value.
+     */
     Season() : value(FOSSIL_SEASON_UNKNOWN) {}
+
+    /**
+     * @brief Constructor that sets the season value.
+     * @param s The season enumeration value to assign.
+     */
     Season(fossil_season_t s) : value(s) {}
 
+    /**
+     * @brief Static factory method to determine the season for a given date.
+     * 
+     * Evaluates the provided date and returns a Season object representing
+     * the appropriate season based on the specified hemisphere and system.
+     * 
+     * @param date Date object to evaluate.
+     * @param hemi Hemisphere of the observer (defaults to Northern).
+     * @param sys Season system to use (defaults to Meteorological).
+     * @return Season object representing the determined season.
+     */
     static Season of(
         const Date &date,
         fossil_hemisphere_t hemi = FOSSIL_HEMISPHERE_NORTHERN,
@@ -142,10 +162,25 @@ public:
         );
     }
 
+    /**
+     * @brief Get the human-readable name of this season.
+     * @return String representation of the season name.
+     */
     std::string name() const {
         return fossil_season_name(value);
     }
 
+    /**
+     * @brief Check if a given date falls within this season.
+     * 
+     * Determines whether the provided date is contained within this Season
+     * object's season, considering the specified hemisphere and system.
+     * 
+     * @param date Date object to check.
+     * @param hemi Hemisphere of the observer (defaults to Northern).
+     * @param sys Season system to use (defaults to Meteorological).
+     * @return True if the date falls within this season, false otherwise.
+     */
     bool is(
         const Date &date,
         fossil_hemisphere_t hemi = FOSSIL_HEMISPHERE_NORTHERN,
